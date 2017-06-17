@@ -1,3 +1,16 @@
+"""
+    FEMAP695
+
+A module containing functions for use with FEMA P695 studies.
+
+# Functions
+* ACMRxx - Compute the acceptable collapse margin ratio.
+* beta_total - Compute the total uncertainty present in the system.
+* mappedValue - Retrieve mapped seismic demand parameters.
+* SF1 - Calculate scale factor 1.
+* SMT - Calculate intensity of the maximum considered earthquake.
+* SSF - Calculate the spectral shape factor.
+"""
 module FEMAP695
 
 using Distributions, Roots, Interpolations
