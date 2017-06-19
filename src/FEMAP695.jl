@@ -50,41 +50,37 @@ Compute the total uncertainty present in the system.
 Refer to section 7.3.1 for details.
 """
 function beta_total(rating_DR::String, rating_TD::String, rating_MDL::String, mu_T::Float64)
-    rating_DR  = lowercase(rating_DR)
-    rating_TD  = lowercase(rating_TD)
-    rating_MDL = lowercase(rating_MDL)
-
-    if     rating_DR == "a"
+    if     ismatch(r"A"i, rating_DR)
         beta_DR = 0.10
-    elseif rating_DR == "b"
+    elseif ismatch(r"B"i, rating_DR)
         beta_DR = 0.20
-    elseif rating_DR == "c"
+    elseif ismatch(r"C"i, rating_DR)
         beta_DR = 0.35
-    elseif rating_DR == "d"
+    elseif ismatch(r"D"i, rating_DR)
         beta_DR = 0.50
     else
         error("Unknown rating_DR: $(rating_DR)")
     end
 
-    if     rating_TD == "a"
+    if     ismatch(r"A"i, rating_TD)
         beta_TD = 0.10
-    elseif rating_TD == "b"
+    elseif ismatch(r"B"i, rating_TD)
         beta_TD = 0.20
-    elseif rating_TD == "c"
+    elseif ismatch(r"C"i, rating_TD)
         beta_TD = 0.35
-    elseif rating_TD == "d"
+    elseif ismatch(r"D"i, rating_TD)
         beta_TD = 0.50
     else
         error("Unknown rating_TD: $(rating_TD)")
     end
 
-    if     rating_MDL == "a"
+    if     ismatch(r"A"i, rating_MDL)
         beta_MDL = 0.10
-    elseif rating_MDL == "b"
+    elseif ismatch(r"B"i, rating_MDL)
         beta_MDL = 0.20
-    elseif rating_MDL == "c"
+    elseif ismatch(r"C"i, rating_MDL)
         beta_MDL = 0.35
-    elseif rating_MDL == "d"
+    elseif ismatch(r"d"i, rating_MDL)
         beta_MDL = 0.50
     else
         error("Unknown rating_MDL: $(rating_MDL)")
@@ -100,48 +96,36 @@ end  # function beta_total
 """
     mappedValue(value, sdc)
 
-Retrieve the mapped seismic demand parameter for the given seismic design category
+Retrieve the mapped seismic demand parameter for the given seismic design category.
 
 
 """
 function mappedValue(value, sdc)
-    sdc   = lowercase(sdc)
-    value = lowercase(value)
-
-    if     sdc == "dmax"
+    if     ismatch(r"Dmax"i, sdc)
         SS  = 1.5;      Fa  = 1.0;      SMS = 1.5;      SDS = 1.0
         S1  = 0.60;     Fv  = 1.50;     SM1 = 0.90;     SD1 = 0.60
-    elseif sdc == "cmax" || sdc == "dmin"
-        SS  = 0.55;     Fa  = 1.36;     SMS = 0.75;     SDS = 0.50;
-        S1  = 0.132;    Fv  = 2.28;     SM1 = 0.30;     SD1 = 0.20;
-    elseif sdc == "bmax" || sdc == "cmin"
-        SS  = 0.33;     Fa  = 1.53;     SMS = 0.50;     SDS = 0.33;
-        S1  = 0.083;    Fv  = 2.4;      SM1 = 0.20;     SD1 = 0.133;
-    elseif sdc == "bmin"
-        SS  = 0.156;    Fa  = 1.6;      SMS = 0.25;     SDS = 0.167;
-        S1  = 0.042;    Fv  = 2.4;      SM1 = 0.10;     SD1 = 0.067;
+    elseif ismatch(r"(Cmax|Dmin)"i, sdc)
+        SS  = 0.55;     Fa  = 1.36;     SMS = 0.75;     SDS = 0.50
+        S1  = 0.132;    Fv  = 2.28;     SM1 = 0.30;     SD1 = 0.20
+    elseif ismatch(r"(Bmax|Cmin)"i, sdc)
+        SS  = 0.33;     Fa  = 1.53;     SMS = 0.50;     SDS = 0.33
+        S1  = 0.083;    Fv  = 2.4;      SM1 = 0.20;     SD1 = 0.133
+    elseif ismatch(r"Bmin"i, sdc)
+        SS  = 0.156;    Fa  = 1.6;      SMS = 0.25;     SDS = 0.167
+        S1  = 0.042;    Fv  = 2.4;      SM1 = 0.10;     SD1 = 0.067
     else
         error("Unknown seismic design category: $(sdc)")
     end
 
-    if value == "ss"
-        return SS
-    elseif value == "s1"
-        return S1
-    elseif value == "fa"
-        return Fa
-    elseif value == "fv"
-        return Fv
-    elseif value == "sms"
-        return SMS
-    elseif value == "sm1"
-        return SM1
-    elseif value == "sds"
-        return SDS
-    elseif value == "sd1"
-        return SD1
-    elseif value == "ts"
-        return SD1/SDS
+    if     ismatch(r"SS"i,  value); return SS
+    elseif ismatch(r"S1"i,  value); return S1
+    elseif ismatch(r"Fa"i,  value); return Fa
+    elseif ismatch(r"Fv"i,  value); return Fv
+    elseif ismatch(r"SMS"i, value); return SMS
+    elseif ismatch(r"SM1"i, value); return SM1
+    elseif ismatch(r"SDS"i, value); return SDS
+    elseif ismatch(r"SD1"i, value); return SD1
+    elseif ismatch(r"TS"i,  value); return SD1/SDS
     else
         error("Unknown value: $(value)")
     end
@@ -150,21 +134,22 @@ end  # function mappedValue
 
 
 """
-    SF1(T, sdc, set="farfield")
+    SF1(T, sdc, gmset="farfield")
 
 Calculate scale factor 1, used to scale the intensity of the ground motions to the intensity
 of the maximum considered earthquake.
 """
-function SF1(T, sdc, set="farfield")
-    if set == "farfield"
+function SF1(T, sdc, gmset="farfield")
+    if ismatch(r"farfield"i, gmset)
         T_interp    = [0.25, 0.30, 0.35, 0.40, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2,
                        1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.5, 4.0, 4.5, 5.0]
-        SNRT_interp = [0.785, 0.781, 0.767, 0.754, 0.755, 0.742, 0.607, 0.541, 0.453, 0.402, 0.350, 0.303,
-                       0.258, 0.210, 0.169, 0.149, 0.134, 0.119, 0.106, 0.092, 0.081, 0.063, 0.053, 0.046, 0.041]
-    elseif set == "nearfield"
-        error("Not implemented: $(set)")
+        SNRT_interp = [0.785, 0.781, 0.767, 0.754, 0.755, 0.742, 0.607, 0.541, 0.453, 0.402,
+                       0.350, 0.303, 0.258, 0.210, 0.169, 0.149, 0.134, 0.119, 0.106, 0.092,
+                       0.081, 0.063, 0.053, 0.046, 0.041]
+    elseif ismatch(r"nearfield"i, gmset)
+        error("Not implemented: $(gmset)")
     else
-        error("Unknown ground motion set: $(set)")
+        error("Unknown ground motion set: $(gmset)")
     end
 
     if T <= T_interp[1] || T >= T_interp[end]
