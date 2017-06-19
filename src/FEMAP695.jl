@@ -98,6 +98,11 @@ end  # function beta_total
 
 Retrieve the mapped seismic demand parameter for the given seismic design category.
 
+# Arguments
+* `value`: seismic demand parameter.
+  - Permitted values: `SS`, `S1`, `Fa`, `Fv`, `SMS`, `SM1`, `SDS`, `SD1`, `TS`
+* `sdc`: seismic design category.
+  - Permitted values: `Dmax`, `Dmin`, `Cmax`, `Cmin`, `Bmax`, `Bmin`
 
 """
 function mappedValue(value, sdc)
